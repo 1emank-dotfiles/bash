@@ -18,6 +18,7 @@ source "$HOME/.config/bash_aliases"
 [ -d "$HOME/.config/term" ] || mkdir -p "$HOME/.config/term"
 
 update_script fzf --bash
+update_script zola completion --bash
 for file in "$HOME"/.config/term/*; do
         # shellcheck disable=SC1090
         source "$file"
@@ -71,14 +72,11 @@ shopt -s checkwinsize
 shopt -s nullglob
 bind 'set completion-ignore-case on'
 
-theme --check --silent
-export THEME
-
 if [ -z "${TMUX}${NVIM}" ]; then
         [ -n "$DISPLAY" ] && [ "$(tput cols 2>/dev/null)" -lt 100 ] &&
                 xdotool key alt+F10
 
-        exists fastfetch && ${welcome:-true} &&
+        exists fastfetch &&
                 if $color_prompt
                 then fastfetch
                 else fastfetch --pipe
@@ -96,12 +94,3 @@ unset \
     welcome \
     update_script \
     script_is_old
-
-# shellcheck disable=SC2154
-trap '
-_last_arg="$_"
-[ -z "${BASH_COMMAND//${BASH_COMMAND:0:1}/}" ] &&
-        [[ $__char_alias == *"${BASH_COMMAND:0:1}"* ]] &&
-        __char_alias_runner "$BASH_COMMAND"
-: "$_last_arg"
-    ' DEBUG

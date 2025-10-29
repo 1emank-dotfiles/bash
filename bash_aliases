@@ -12,19 +12,28 @@ nv() {
         '*::'*) nvr "$@" ;;
         esac
 }
+lnv() {
+        case "$NVIM::$@" in
+        '::') THEME=light nvim ;;
+        '::'*) THEME=light nvim "$@" ;;
+        '*::') THEME=light nvr ;;
+        '*::'*) THEME=light nvr "$@" ;;
+        esac
+}
+alias nman='MANPAGER="nvim +Man!" man'
+alias lnman='THEME=light MANPAGER="nvim +Man!" man'
+alias upnv="nvim --headless '+Lazy! sync' +qa"
+
 tmux() {
-        if [ -n "$1" ]
+        if [ -n "$2" ]
         then command tmux "$@"
         else command tmux attach 2>/dev/null || command tmux
         fi
 }
-alias nman='NVIM_LISTEN_ADDRESS=/tmp/nvimsocket MANPAGER="nvim +Man!" man'
 alias work='launch -q brave --user-data-dir="$HOME/.local/work"'
-alias luaf='stylua --config-path ~/.config/stylua.toml'
 
-char_alias x='pushd ..'
-char_alias z='popd'
-char_alias t='echo'
+alias x='pushd ..'
+alias z='popd'
 alias c='pushd'
 
 alias ls='ls --color=auto'
@@ -53,40 +62,13 @@ notes() {
                 ;;
         esac
 }
-upa_distro() {
-        local SUDO="$1"
-        if exists pacman; then
-                $SUDO pacman -Syu --noconfirm
-                exists paru && paru -Syu --noconfirm && return
-                exists yay && yay -Syu --noconfirm && return 
-                return 0
-        fi
-        if exists pkg; then
-                $SUDO pkg upgrade -y && exists apt &&
-                        $SUDO apt autoremove --purge -y
-                return 0
-        fi
-        if exists apt; then
-                $SUDO apt full-upgrade -y && $SUDO apt autoremove --purge -y
-                return 0
-        fi
-}
-update_all() {
-        local SUDO root
-        if [ "$EUID" -eq 0 ]
-        then root=true
-        else root=false
-        fi
-        exists sudo && ! $root && SUDO=sudo
 
-        upa_distro $SUDO
-        nvim --headless '+Lazy! sync' +qa
-        exists rustup && ! $root && rustup update
-        true
-}
-alias upa=update_all
-
-fzf_programs() {
-    return 1
-}
-alias ht='npm create parcel vanilla'
+DISTRO="$(lsb_release -i | cut -d: -f2 | xargs)"
+case "$DISTRO" in
+EndeavourOS|Arch)
+        alias upman='sudo pacman -Syu; paru -Syu'
+        alias uprs='rustup update'
+        alias upnjs='npm -g update'
+        alias upa='upman; uprs; upnjs'
+        ;;
+esac

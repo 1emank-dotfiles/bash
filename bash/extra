@@ -1,0 +1,15 @@
+#
+# ~/.config/bash/extra
+#
+# vi: ft=sh
+#
+
+#fzf
+_fzf_lazy() {
+        [ -f /usr/share/fzf/key-bindings.bash ] && source /usr/share/fzf/key-bindings.bash
+        unset -f _fzf_lazy
+}
+
+bind -x '"\C-t": _fzf_lazy; __fzf_select__'
+bind -x '"\C-r": _fzf_lazy; __fzf_history__'
+bind -x '"\A-c": _fzf_lazy; __fzf_cd__'

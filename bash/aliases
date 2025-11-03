@@ -1,5 +1,5 @@
 #
-# ~/.config/bash_aliases
+# ~/.config/bash/aliases
 #
 # vi: ft=sh
 #
@@ -13,12 +13,7 @@ nv() {
         esac
 }
 lnv() {
-        case "$NVIM::$@" in
-        '::') THEME=light nvim ;;
-        '::'*) THEME=light nvim "$@" ;;
-        '*::') THEME=light nvr ;;
-        '*::'*) THEME=light nvr "$@" ;;
-        esac
+        THEME=light nv "$@"
 }
 alias nman='MANPAGER="nvim +Man!" man'
 alias lnman='THEME=light MANPAGER="nvim +Man!" man'
@@ -38,7 +33,10 @@ alias c='pushd'
 
 alias ls='ls --color=auto'
 alias la='ls -A --color=auto'
+alias l='ls -AF --color=auto'
+alias ll='ls -lAFh --color=auto'
 alias grep='grep --color=auto'
+alias bat='bat --paging=always'
 
 notes() {
         [ -z "$NOTES_DIR" ] && local NOTES_DIR="$HOME/repos/notes"

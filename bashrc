@@ -12,17 +12,9 @@ HISTFILESIZE=2000
 HISTCONTROL=ignoreboth
 HISTIGNORE=ls:pwd:clear:reload:reset
 
-source "$HOME/.config/bash_functions"
-source "$HOME/.config/bash_aliases"
-
-[ -d "$HOME/.config/term" ] || mkdir -p "$HOME/.config/term"
-
-update_script fzf --bash
-update_script zola completion --bash
-for file in "$HOME"/.config/term/*; do
-        # shellcheck disable=SC1090
-        source "$file"
-done
+[ -f "$HOME/.config/bash/functions" ] && source "$HOME/.config/bash/functions"
+[ -f "$HOME/.config/bash/aliases" ] && source "$HOME/.config/bash/aliases"
+[ -f "$HOME/.config/bash/extra" ] && source "$HOME/.config/bash/extra"
 
 use_color && {
         SUCCESS=$'\[\E[92m\]'   #\[$(tput setaf 10)\]
@@ -63,7 +55,7 @@ PS1+=`  #[git branch<status>] #if they exist
         `'${__errno:+'"$ERROR"'['"$RESET"'$__errno'"$ERROR"']}'"$RESET"`
 
         # '$' if normal user, '#' if root
-        `"$({ [ "$(id -ru)" = 0 ] && echo '# '; } || echo '$ ')"
+        `"$({ [ $UID = 0 ] && echo '# '; } || echo '$ ')"
 
 
 ## Opts
@@ -72,15 +64,15 @@ shopt -s checkwinsize
 shopt -s nullglob
 bind 'set completion-ignore-case on'
 
-if [ -z "${TMUX}${NVIM}" ]; then
-        [ -n "$DISPLAY" ] && [ "$(tput cols 2>/dev/null)" -lt 100 ] &&
-                xdotool key alt+F10
-
-        exists fastfetch &&
+if [ ! -f /tmp/bash_welcome_$UID ] && [ -z "${TMUX}${NVIM}" ]; then
+        :> /tmp/bash_welcome_$UID
+        if exists fastfetch; then
                 if $color_prompt
                 then fastfetch
                 else fastfetch --pipe
                 fi
+        #TODO: else some fallback, maybe
+        fi
 fi
 
 unset \
@@ -90,7 +82,4 @@ unset \
     WARNING \
     RESET \
     color_prompt \
-    use_color \
-    welcome \
-    update_script \
-    script_is_old
+    use_color

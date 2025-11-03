@@ -39,7 +39,7 @@ alias grep='grep --color=auto'
 alias bat='bat --paging=always'
 
 notes() {
-        [ -z "$NOTES_DIR" ] && local NOTES_DIR="$HOME/repos/notes"
+        [ -z "$NOTES_DIR" ] && local NOTES_DIR="$HOME/repos/personal/notes"
         [ -d "$NOTES_DIR" ] || return 1
 
         case "$(pwd)" in

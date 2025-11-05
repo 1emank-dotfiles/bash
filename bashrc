@@ -7,6 +7,24 @@
 # If not running interactively, don't do anything
 [[ $- != *i* ]] && return
 
+rc_vars=()
+rc_local() {
+        local name
+        local value
+        IFS='=' read -r name value <<< "$1"
+        eval "$name='$value'"
+        rc_vars+=("$name")
+}
+rc_unset() {
+        local var
+        for var in "${rc_vars[@]}"; do
+                unset "$var"
+        done
+        unset rc_local
+        unset rc_unset
+        unset rc_vars
+}
+
 HISTSIZE=1000
 HISTFILESIZE=2000
 HISTCONTROL=ignoreboth
@@ -17,11 +35,12 @@ HISTIGNORE=ls:pwd:clear:reload:reset
 [ -f "$HOME/.config/bash/extra" ] && source "$HOME/.config/bash/extra"
 
 use_color && {
-        SUCCESS=$'\[\E[92m\]'   #\[$(tput setaf 10)\]
-        TITLE=$'\[\E[94m\]'     #\[$(tput setaf 12)\]
-        ERROR=$'\[\E[91m\]'     #\[$(tput setaf 9)\]
-        WARNING=$'\[\E[93m\]'   #\[$(tput setaf 11)\]
-        RESET=$'\[\E(B\E[m\]'   #\[$(tput sgr0)\]
+        unset use_color
+        rc_local SUCCESS=$'\[\E[92m\]'   #\[$(tput setaf 10)\]
+        rc_local TITLE=$'\[\E[94m\]'     #\[$(tput setaf 12)\]
+        rc_local ERROR=$'\[\E[91m\]'     #\[$(tput setaf 9)\]
+        rc_local WARNING=$'\[\E[93m\]'   #\[$(tput setaf 11)\]
+        rc_local RESET=$'\[\E(B\E[m\]'   #\[$(tput sgr0)\]
 }
 
 __PROMPT_COMMAND() {
@@ -34,31 +53,26 @@ __PROMPT_COMMAND() {
                 __status=
         fi
 }
-
 PROMPT_COMMAND=__PROMPT_COMMAND
 
+rc_local TERMUX
 case "$HOME" in
 *termux*) TERMUX=true ;;
 *) TERMUX=false ;;
 esac
 
-if $TERMUX; then
-#[USER@HOSTNAME:PWD], [PWD] in termux
-        PS1="[${TITLE}\w${RESET}]"
-else
-        PS1="[${SUCCESS}\u@\h${RESET}:${TITLE}\w${RESET}]"
+if $TERMUX
+then PS1="[${TITLE}\w${RESET}]"
+else PS1="[${SUCCESS}\u@\h${RESET}:${TITLE}\w${RESET}]"
 fi
-
 PS1+=`  #[git branch<status>] #if they exist
         `'${__branch:+'`
                 `'['"${SUCCESS}"'$__branch${__status:+'`
                         `"$WARNING"'<'"$RESET"'$__status'"$WARNING"'>}'`
                 `"${RESET}"']'`
         `'}'`
-
         #[$?] if different than 0
         `'${__errno:+'"$ERROR"'['"$RESET"'$__errno'"$ERROR"']}'"$RESET"`
-
         # '$' if normal user, '#' if root
         `"$({ [ $UID = 0 ] && echo '# '; } || echo '$ ')"
 
@@ -76,23 +90,16 @@ if $TERMUX; then
         else
                 :> ~/../../cache/bash_welcome_$UID
         fi
-elif [ ! -f /tmp/bash_welcome_$UID ] && [ -z "${TMUX}${NVIM}" ]; then
+elif
+        exists fastfetch &&
+        [ ! -f /tmp/bash_welcome_$UID ] &&
+        [ -z "${TMUX}${NVIM}" ]
+then
         :> /tmp/bash_welcome_$UID
-        if exists fastfetch; then
-                if $color_prompt
-                then fastfetch
-                else fastfetch --pipe
-                fi
-        #TODO: else some fallback, maybe
+        if [ -n "$SUCCESS" ] #implies color support
+        then fastfetch
+        else fastfetch --pipe
         fi
 fi
 
-unset \
-    SUCCESS \
-    TITLE \
-    ERROR \
-    WARNING \
-    RESET \
-    color_prompt \
-    use_color \
-    TERMUX
+rc_unset

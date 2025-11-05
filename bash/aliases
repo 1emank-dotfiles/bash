@@ -61,12 +61,20 @@ notes() {
         esac
 }
 
-DISTRO="$(lsb_release -i | cut -d: -f2 | xargs)"
+if exists lsb_release; then
+    DISTRO="$(lsb_release -i | cut -d: -f2 | xargs)"
+else
+    DISTRO=Termux
+fi
 case "$DISTRO" in
 EndeavourOS|Arch)
         alias upman='sudo pacman -Syu; paru -Syu'
         alias uprs='rustup update'
         alias upnjs='npm -g update'
-        alias upa='upman; uprs; upnjs'
+        alias upa='upman; uprs; upnjs; upnv'
+        ;;
+Termux)
+        alias upman='pkg up'
+        alias upa='upman; upnv'
         ;;
 esac

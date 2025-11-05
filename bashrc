@@ -38,11 +38,16 @@ __PROMPT_COMMAND() {
 PROMPT_COMMAND=__PROMPT_COMMAND
 
 case "$HOME" in
-*termux*) #[USER@HOSTNAME:PWD], [PWD] in termux
-        PS1="[${TITLE}\w${RESET}]" ;;
-*)
-        PS1="[${SUCCESS}\u@\h${RESET}:${TITLE}\w${RESET}]" ;;
+*termux*) TERMUX=true ;;
+*) TERMUX=false ;;
 esac
+
+if $TERMUX; then
+#[USER@HOSTNAME:PWD], [PWD] in termux
+        PS1="[${TITLE}\w${RESET}]"
+else
+        PS1="[${SUCCESS}\u@\h${RESET}:${TITLE}\w${RESET}]"
+fi
 
 PS1+=`  #[git branch<status>] #if they exist
         `'${__branch:+'`
@@ -64,7 +69,14 @@ shopt -s checkwinsize
 shopt -s nullglob
 bind 'set completion-ignore-case on'
 
-if [ ! -f /tmp/bash_welcome_$UID ] && [ -z "${TMUX}${NVIM}" ]; then
+if $TERMUX; then
+        if [ -f ~/../../cache/bash_welcome_$UID ]; then
+                fastfetch
+                rm ~/../../cache/bash_welcome_$UID
+        else
+                :> ~/../../cache/bash_welcome_$UID
+        fi
+elif [ ! -f /tmp/bash_welcome_$UID ] && [ -z "${TMUX}${NVIM}" ]; then
         :> /tmp/bash_welcome_$UID
         if exists fastfetch; then
                 if $color_prompt
@@ -82,4 +94,5 @@ unset \
     WARNING \
     RESET \
     color_prompt \
-    use_color
+    use_color \
+    TERMUX

@@ -6,7 +6,10 @@
 
 #fzf
 _fzf_lazy() {
-        [ -f /usr/share/fzf/key-bindings.bash ] && source /usr/share/fzf/key-bindings.bash
+        if [ -f /usr/share/fzf/key-bindings.bash ]
+        then source /usr/share/fzf/key-bindings.bash
+        else eval "$(fzf --bash)"
+        fi
         unset -f _fzf_lazy
 }
 

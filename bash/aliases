@@ -75,6 +75,7 @@ EndeavourOS|Arch)
         ;;
 Termux)
         alias upman='pkg up'
-        alias upa='upman; upnv'
+        alias upnjs='npm -g update'
+        alias upa='upman; upnjs; upnv'
         ;;
 esac

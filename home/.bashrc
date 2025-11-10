@@ -81,6 +81,7 @@ PS1+=`  #[git branch<status>] #if they exist
 shopt -s histappend
 shopt -s checkwinsize
 shopt -s nullglob
+set -o vi
 bind 'set completion-ignore-case on'
 
 if $TERMUX; then

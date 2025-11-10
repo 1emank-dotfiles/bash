@@ -25,6 +25,8 @@ export BROWSER=brave
 add_to_path "${HOME}/.local/bin"
 add_to_path "${HOME}/node_modules/.bin"
 add_to_path "${HOME}/.cargo/bin"
+add_to_path "${HOME}/.nix-profile/bin"
+
 export PATH
 
 [ -f "${HOME}/.bashrc" ] && source "${HOME}/.bashrc"

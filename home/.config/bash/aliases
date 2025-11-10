@@ -16,6 +16,7 @@ lnv() {
         THEME=light nv "$@"
 }
 alias nman='MANPAGER="nvim +Man!" man'
+alias sunv='sudo -E nvim'
 alias lnman='THEME=light MANPAGER="nvim +Man!" man'
 alias upnv="nvim --headless '+Lazy! sync' +qa"
 
@@ -27,7 +28,7 @@ tmux() {
 }
 alias work='launch -q brave --user-data-dir="$HOME/.local/work"'
 
-alias x='pushd ..'
+alias ..='..'
 alias z='popd'
 alias c='pushd'
 

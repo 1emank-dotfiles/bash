@@ -28,7 +28,8 @@ tmux() {
 }
 alias work='launch -q brave --user-data-dir="$HOME/.local/work"'
 
-alias ..='..'
+alias ..='cd ..'
+alias x='pushd ..'
 alias z='popd'
 alias c='pushd'
 

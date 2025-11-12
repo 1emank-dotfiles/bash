@@ -1,10 +1,11 @@
-root ?= $(shell IFS=# read -r pre post < watchlist; echo $$post )
+root ?= $(shell IFS=# read -r pre post < watchlist; echo "$$post" )
 
 tree:
 	@tree data -aC
 
 deps:
-	@command -v rsync >/dev/null 2>&1
+	@command -v rsync >/dev/null 2>&1 && \
+		echo "Dependencies (as in programs installed) satisfied."
 
 valid_root: watchlist
 	@case "$(root)" in //*) false;; esac
@@ -20,7 +21,7 @@ repo: deps valid_root
 		fi \
 	done < watchlist
 
-home: deps valid_root
+target: deps valid_root
 	@while read -r file; do \
 		if [ -d "./data/$$file/" ]; then \
 			rsync -v "./data/$$file/" "$(root)/$$file/"\

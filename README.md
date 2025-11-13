@@ -1,4 +1,4 @@
-# 1emank's bash dotfiles
+# 1emank's Bash dotfiles
 
 ## What is this?
 

@@ -4,15 +4,14 @@
 # vi: ft=sh
 #
 
-#fzf
-_fzf_lazy() {
-        if [ -f /usr/share/fzf/key-bindings.bash ]
-        then source /usr/share/fzf/key-bindings.bash
-        else eval "$(fzf --bash)"
-        fi
-        unset -f _fzf_lazy
-}
+if exists fzf; then
+        _fzf_lazy() {
+                unset -f _fzf_lazy
+                eval "$(fzf --bash)"
+                $1
+        }
 
-bind -x '"\C-t": _fzf_lazy; __fzf_select__'
-bind -x '"\C-r": _fzf_lazy; __fzf_history__'
-bind -x '"\A-c": _fzf_lazy; __fzf_cd__'
+        bind -x '"\C-t": _fzf_lazy __fzf_select__'
+        bind -x '"\C-r": _fzf_lazy __fzf_history__'
+        bind -x '"\A-c": _fzf_lazy __fzf_cd__'
+fi

@@ -5,23 +5,23 @@
 Quite self-explanatory, these are the dotfiles that define my Bash setup. It
 has the following features between others:
 
-- git integration: It shows you if your are in a git repo by showing the name
-  of the active branch. It also shows how many items are in `git status -s`.
+- git integration: It shows the status and branch if you are in a repo
 - Vi mode
 - Termux integration
-- Case insensitive autocomplete
-- Lazy loaded fzf
-- add_to_path function in .bash_profile: Checks if dir is already in $PATH
-- rc_local function in .bashrc: Declares variables for easy cleanup. Similar to
-  `local` but since these files are `source`d and not run, there's no easy
-  mechanism to have temporal variables.
+- Case insensitive tab completion
+- Lazy loaded fzf (if you have it installed)
+- `add_to_path`: Checks if dir is already in $PATH
+- `rc_local`: Declares variables for easy cleanup. Similar to `local` but for
+  `.bashrc`
 
 ## Requirements
 
-For the simplest and documented workflow you will need `make` and `rsync` to
-take advantage of the Makefile (and probably `git` to copy the repo). A
-Makefile command uses `tree` but it's not important. Feel free to follow the
-instructions and use the Makefile or not.
+Everything is optional:
+
+- `make`: To take advantage of the Makefile
+- `rsync`: Same as above. It will install the files.
+- `git`: To clone the repo and for the git integration
+- `tree`: (Very optional) See `make tree` in this README
 
 ## Instructions
 
@@ -41,6 +41,8 @@ baz
 The relative paths are interpreted as relative to `#/absolute/path`. You can
 use POSIX variable expansion in the absolute path, like `#$HOME` or
 `#$XDG_CONFIG_DIR/subdir`.
+
+IMPORTANT: All items must end without slash "/"
 
 ### Main commands
 

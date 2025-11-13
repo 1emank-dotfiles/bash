@@ -30,12 +30,23 @@ HISTFILESIZE=2000
 HISTCONTROL=ignoreboth
 HISTIGNORE=ls:pwd:clear:reload:reset
 
+## Opts
+
+shopt -s histappend
+shopt -s checkwinsize
+shopt -s nullglob
+set -o vi #some macros conflicts with fzf, so fzf has to be after this
+bind 'set completion-ignore-case on'
+
+## Files
+
 [ -f "$HOME/.config/bash/functions" ] && source "$HOME/.config/bash/functions"
 [ -f "$HOME/.config/bash/aliases" ] && source "$HOME/.config/bash/aliases"
 [ -f "$HOME/.config/bash/extra" ] && source "$HOME/.config/bash/extra"
 
+## PS1
+
 use_color && {
-        unset use_color
         rc_local SUCCESS=$'\[\E[92m\]'   #\[$(tput setaf 10)\]
         rc_local TITLE=$'\[\E[94m\]'     #\[$(tput setaf 12)\]
         rc_local ERROR=$'\[\E[91m\]'     #\[$(tput setaf 9)\]
@@ -43,19 +54,8 @@ use_color && {
         rc_local RESET=$'\[\E(B\E[m\]'   #\[$(tput sgr0)\]
 }
 
-__PROMPT_COMMAND() {
-        __errno=$?
-        [ "$__errno" = 0 ] && __errno=
-        if __branch="$(git branch --show-current 2>/dev/null)"; then
-                __status="$(git status -s 2>/dev/null | wc -l)"
-                [ "$__status" = 0 ] && __status=
-        else
-                __status=
-        fi
-}
-PROMPT_COMMAND=__PROMPT_COMMAND
-
 rc_local TERMUX
+
 case "$HOME" in
 *termux*) TERMUX=true ;;
 *) TERMUX=false ;;
@@ -65,31 +65,41 @@ if $TERMUX
 then PS1="[${TITLE}\w${RESET}]"
 else PS1="[${SUCCESS}\u@\h${RESET}:${TITLE}\w${RESET}]"
 fi
-PS1+=`  #[git branch<status>] #if they exist
-        `'${__branch:+'`
+
+if exists git; then
+        __PROMPT_COMMAND() {
+                __errno=$?
+                [ "$__errno" = 0 ] && __errno=
+                if __branch="$(git branch --show-current 2>/dev/null)"; then
+                        __status="$(git status -s 2>/dev/null | wc -l)"
+                        [ "$__status" = 0 ] && __status=
+                else
+                        __status=
+                fi
+        }
+        PROMPT_COMMAND=__PROMPT_COMMAND
+        #[git branch<status>][$?] (only if they exist)
+        PS1+='${__branch:+'`
                 `'['"${SUCCESS}"'$__branch${__status:+'`
                         `"$WARNING"'<'"$RESET"'$__status'"$WARNING"'>}'`
                 `"${RESET}"']'`
         `'}'`
-        #[$?] if different than 0
-        `'${__errno:+'"$ERROR"'['"$RESET"'$__errno'"$ERROR"']}'"$RESET"`
-        # '$' if normal user, '#' if root
-        `"$({ [ $UID = 0 ] && echo '# '; } || echo '$ ')"
+        `'${__errno:+'"$ERROR"'['"$RESET"'$__errno'"$ERROR"']}'"$RESET"
+fi
 
+if [ $UID = 0 ]
+then PS1+="$WARNING"'# '"$RESET"
+else PS1+='$ '
+fi
 
-## Opts
-shopt -s histappend
-shopt -s checkwinsize
-shopt -s nullglob
-set -o vi
-bind 'set completion-ignore-case on'
+## Welcome
 
-if $TERMUX; then
-        if [ -f ~/../../cache/bash_welcome_$UID ]; then
+if $TERMUX && exists fastfetch; then #implies color support
+        if [ -f ~/../../cache/bash_welcome ]; then
                 fastfetch
-                rm ~/../../cache/bash_welcome_$UID
+                rm ~/../../cache/bash_welcome
         else
-                :> ~/../../cache/bash_welcome_$UID
+                :> ~/../../cache/bash_welcome
         fi
 elif
         exists fastfetch &&
@@ -103,4 +113,4 @@ then
         fi
 fi
 
-rc_unset
+rc_unset #cleanup

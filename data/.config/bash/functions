@@ -19,6 +19,7 @@ reset() { [ -n "$TMUX" ] && tmux clear-history; command reset; }
 
 ## RC
 use_color() {
+        unset -f use_color
         # shellcheck disable=SC2154
         case "$TERM:$color_prompt" in
         *:false) return 1 ;;

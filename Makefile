@@ -24,10 +24,10 @@ repo: deps valid_root
 	#
 	@while read -r file; do \
 		if [ -d "$(root)/$$file/" ]; then \
-			rsync -ai "$(root)/$$file/" "./data/$$file/" \
+			rsync -i "$(root)/$$file/" "./data/$$file/" \
 				--delete --recursive --mkpath; \
 		elif [ -f "$(root)/$$file" ]; then \
-			rsync -ai "$(root)/$$file" "./data/$$file" --mkpath; \
+			rsync -i "$(root)/$$file" "./data/$$file" --mkpath; \
 		fi \
 	done < watchlist
 
@@ -37,10 +37,10 @@ backup: deps valid_root
 	#
 	@while read -r file; do \
 		if [ -d "$(root)/$$file/" ]; then \
-			rsync -ai "$(root)/$$file/" "./backup/$$file/" \
+			rsync -i "$(root)/$$file/" "./backup/$$file/" \
 				--delete --recursive --mkpath; \
 		elif [ -f "$(root)/$$file" ]; then \
-			rsync -ai "$(root)/$$file" "./backup/$$file" --mkpath; \
+			rsync -i "$(root)/$$file" "./backup/$$file" --mkpath; \
 		fi \
 	done < watchlist
 
@@ -50,10 +50,10 @@ recover: deps valid_root
 	#
 	@while read -r file; do \
 		if [ -d "./backup/$$file/" ]; then \
-			rsync -ai "./backup/$$file/" "$(root)/$$file/"\
+			rsync -i "./backup/$$file/" "$(root)/$$file/"\
 				--delete --recursive --mkpath; \
 		elif [ -f "./backup/$$file" ]; then \
-			rsync -ai "./backup/$$file" "$(root)/$$file" --mkpath; \
+			rsync -i "./backup/$$file" "$(root)/$$file" --mkpath; \
 		fi \
 	done < watchlist
 
@@ -63,10 +63,10 @@ deploy: deps valid_root
 	#
 	@while read -r file; do \
 		if [ -d "./data/$$file/" ]; then \
-			rsync -ai "./data/$$file/" "$(root)/$$file/"\
+			rsync -i "./data/$$file/" "$(root)/$$file/"\
 				--delete --recursive --mkpath; \
 		elif [ -f "./data/$$file" ]; then \
-			rsync -ai "./data/$$file" "$(root)/$$file" --mkpath; \
+			rsync -i "./data/$$file" "$(root)/$$file" --mkpath; \
 		fi \
 	done < watchlist
 

@@ -4,29 +4,70 @@ tree:
 	@tree data -aC
 
 deps:
-	@command -v rsync >/dev/null 2>&1 && \
-		echo "Dependencies (as in programs installed) satisfied."
+	@missing=false; \
+	dep() {\
+		if ! command -v $$1 >/dev/null 2>&1; then \
+			echo Missing dependency: $$1; \
+			missing=true; \
+		fi; \
+	}; \
+	dep rsync; \
+	! $$missing
 
 valid_root: watchlist
 	@case "$(root)" in //*) false;; esac
 	@[ -d "$(root)" ]
 
 repo: deps valid_root
+	#
+	# Copying from `$(root)/` to `data/`
+	#
 	@while read -r file; do \
 		if [ -d "$(root)/$$file/" ]; then \
-			rsync -v "$(root)/$$file/" "./data/$$file/" \
+			rsync -ai "$(root)/$$file/" "./data/$$file/" \
 				--delete --recursive --mkpath; \
 		elif [ -f "$(root)/$$file" ]; then \
-			rsync -v "$(root)/$$file" "./data/$$file" --mkpath; \
+			rsync -ai "$(root)/$$file" "./data/$$file" --mkpath; \
 		fi \
 	done < watchlist
 
-target: deps valid_root
+backup: deps valid_root
+	#
+	# Copying from `$(root)/` to `backup/`
+	#
 	@while read -r file; do \
-		if [ -d "./data/$$file/" ]; then \
-			rsync -v "./data/$$file/" "$(root)/$$file/"\
+		if [ -d "$(root)/$$file/" ]; then \
+			rsync -ai "$(root)/$$file/" "./backup/$$file/" \
 				--delete --recursive --mkpath; \
-		elif [ -f "./data/$$file" ]; then \
-			rsync -v "./data/$$file" "$(root)/$$file" --mkpath; \
+		elif [ -f "$(root)/$$file" ]; then \
+			rsync -ai "$(root)/$$file" "./backup/$$file" --mkpath; \
 		fi \
 	done < watchlist
+
+recover: deps valid_root
+	#
+	# Copying from `backup/` to `$(root)/`
+	#
+	@while read -r file; do \
+		if [ -d "./backup/$$file/" ]; then \
+			rsync -ai "./backup/$$file/" "$(root)/$$file/"\
+				--delete --recursive --mkpath; \
+		elif [ -f "./backup/$$file" ]; then \
+			rsync -ai "./backup/$$file" "$(root)/$$file" --mkpath; \
+		fi \
+	done < watchlist
+
+deploy: deps valid_root
+	#
+	# Copying from `data/` to `$(root)/`
+	#
+	@while read -r file; do \
+		if [ -d "./data/$$file/" ]; then \
+			rsync -ai "./data/$$file/" "$(root)/$$file/"\
+				--delete --recursive --mkpath; \
+		elif [ -f "./data/$$file" ]; then \
+			rsync -ai "./data/$$file" "$(root)/$$file" --mkpath; \
+		fi \
+	done < watchlist
+
+install: backup deploy

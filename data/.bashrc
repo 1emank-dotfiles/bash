@@ -35,6 +35,8 @@ HISTIGNORE=ls:pwd:clear:reload:reset
 shopt -s histappend
 shopt -s checkwinsize
 shopt -s nullglob
+shopt -s globstar
+shopt -s autocd
 set -o vi #some macros conflicts with fzf, so fzf has to be after this
 bind 'set completion-ignore-case on'
 

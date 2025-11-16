@@ -21,6 +21,7 @@ command -v manpath >/dev/null 2>&1 &&
 export EDITOR=nvim
 export PAGER=less
 export BROWSER=brave
+export LESS='-R --mouse'
 
 add_to_path "${HOME}/.local/bin"
 add_to_path "${HOME}/node_modules/.bin"

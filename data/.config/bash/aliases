@@ -40,14 +40,14 @@ alias grep='grep --color=auto'
 alias bat='bat --paging=always'
 nopager(){ # no pager
         case "$1" in
-        +([1-9]))
+        +([0-9]))
                 if [ -n "$2" ]; then
                         local lines="$1"
                         shift
                         PAGER="head -n $lines" "$@"
                         return
                 fi;;
-        -+([1-9]))
+        -+([0-9]))
                 if [ -n "$2" ]; then
                         local lines="$1"
                         shift
@@ -65,7 +65,6 @@ nopager(){ # no pager
         echo
         echo "If the optional number is positive, it will print the first 'n' lines."
         echo "If it's negative, it will print the last 'n' lines."
-        echo "If it's zero, it will be treated as the command (and likely produce an error)."
         return 1
 }
 alias npg=nopager
@@ -92,22 +91,3 @@ notes() {
                 ;;
         esac
 }
-
-if exists lsb_release; then
-    DISTRO="$(lsb_release -i | cut -d: -f2 | xargs)"
-else
-    DISTRO=Termux
-fi
-case "$DISTRO" in
-EndeavourOS|Arch)
-        alias upman='sudo pacman -Syu; paru -Syu'
-        alias uprs='rustup update'
-        alias upnjs='npm -g update'
-        alias upa='upman; uprs; upnjs; upnv'
-        ;;
-Termux)
-        alias upman='pkg up'
-        alias upnjs='npm -g update'
-        alias upa='upman; upnjs; upnv'
-        ;;
-esac

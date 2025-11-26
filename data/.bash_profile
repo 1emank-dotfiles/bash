@@ -3,31 +3,36 @@
 #
 # vi: ft=sh
 #
+add_to() {
+        local variable="$1"
+        # shellcheck disable=SC2155
+        local dir="$(realpath "$2" 2>/dev/null)"
+        local previous
+        [ -n "$variable" ] || return 1
+        [ -d "$dir" ] || return 1
 
-add_to_path() {
-        [ -d "$1" ] || return
-        local dir="$1"
-
-        case ":${PATH}:" in
+        case "$(eval echo ':${'"$variable"'}:' )" in
         *":${dir}:"*) ;;
-        *) PATH="${PATH}:${dir}" ;;
+        *)
+            # shellcheck disable=SC2016
+            previous='${'"$variable"':+$'"$variable"':}'
+            eval "$variable=$(eval echo "$previous")$dir" ;;
         esac
 }
 
-# shellcheck disable=SC2155
-command -v manpath >/dev/null 2>&1 &&
-    export MANPATH="$(manpath -g):${HOME}/.local/share/man"
+add_to MANPATH "$HOME/.local/share/man"
+MANPATH+=:
+
+add_to PATH "$HOME/.local/bin"
+add_to PATH "$HOME/.cargo/bin"
+
+export MANPATH
+export PATH
 
 export EDITOR=nvim
 export PAGER=less
 export BROWSER=brave
 export LESS='-R --mouse'
 
-add_to_path "${HOME}/.local/bin"
-add_to_path "${HOME}/node_modules/.bin"
-add_to_path "${HOME}/.cargo/bin"
-add_to_path "${HOME}/.nix-profile/bin"
+[ -f "$HOME/.bashrc" ] && source "$HOME/.bashrc"
 
-export PATH
-
-[ -f "${HOME}/.bashrc" ] && source "${HOME}/.bashrc"

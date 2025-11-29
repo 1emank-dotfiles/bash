@@ -21,9 +21,9 @@ alias lnman='THEME=light MANPAGER="nvim +Man!" man'
 alias upnv="nvim --headless '+Lazy! sync' +qa"
 
 tmux() {
-        if [ -n "$2" ]
-        then command tmux "$@"
-        else command tmux attach 2>/dev/null || command tmux
+        if [ -z "$1" ]
+        then command tmux attach 2>/dev/null || command tmux
+        else command tmux "$@"
         fi
 }
 alias work='launch -q brave --user-data-dir="$HOME/.local/work"'

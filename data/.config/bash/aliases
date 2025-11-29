@@ -91,3 +91,12 @@ notes() {
                 ;;
         esac
 }
+got() {
+    local action="${1:-pull}"
+    local branch="${2:-main}"
+    shift 2
+    git "$action" hub "$branch" "$@"
+    git "$action" berg "$branch" "$@"
+}
+
+

@@ -3,6 +3,9 @@
 #
 # vi: ft=sh
 #
+[ -f "$HOME/.nix-profile/etc/profile.d/hm-session-vars.sh" ] &&
+        source "$HOME/.nix-profile/etc/profile.d/hm-session-vars.sh"
+
 add_to() {
         local variable="$1"
         # shellcheck disable=SC2155
@@ -21,7 +24,6 @@ add_to() {
 }
 
 add_to MANPATH "$HOME/.local/share/man"
-MANPATH+=:
 
 add_to PATH "$HOME/.local/bin"
 add_to PATH "$HOME/.cargo/bin"
@@ -35,4 +37,3 @@ export BROWSER=brave
 export LESS='-R --mouse'
 
 [ -f "$HOME/.bashrc" ] && source "$HOME/.bashrc"
-

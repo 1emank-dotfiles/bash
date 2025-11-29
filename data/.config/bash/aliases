@@ -94,8 +94,10 @@ notes() {
 }
 got() {
     local action="${1:-pull}"
-    local branch="${2:-main}"
-    shift 2
+    [ -n "$1" ] && shift
+    local branch="${1:-main}"
+    [ -n "$1" ] && shift
+
     git "$action" hub "$branch" "$@"
     git "$action" berg "$branch" "$@"
 }

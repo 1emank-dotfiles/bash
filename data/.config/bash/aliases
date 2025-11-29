@@ -40,6 +40,7 @@ alias grep='grep --color=auto'
 alias bat='bat --paging=always'
 nopager(){ # no pager
         case "$1" in
+        ""|-+(0)|+(0));;
         +([0-9]))
                 if [ -n "$2" ]; then
                         local lines="$1"
@@ -54,17 +55,17 @@ nopager(){ # no pager
                         PAGER="tail -n $lines" "$@"
                         return
                 fi;;
-        "");;
         *)
             # shellcheck disable=SC2209
             PAGER=cat "$@"
             return;;
         esac
-        echo Usage:
+        { echo Usage:
         echo "    npg [[-]1-n] COMMAND-THAT-EXPECTS-A-PAGER [ARGUMENTS]"
         echo
         echo "If the optional number is positive, it will print the first 'n' lines."
         echo "If it's negative, it will print the last 'n' lines."
+        } 1>&2
         return 1
 }
 alias npg=nopager

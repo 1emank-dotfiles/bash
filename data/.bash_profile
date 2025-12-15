@@ -6,27 +6,26 @@
 [ -f "$HOME/.nix-profile/etc/profile.d/hm-session-vars.sh" ] &&
         source "$HOME/.nix-profile/etc/profile.d/hm-session-vars.sh"
 
-add_to() {
-        local variable="$1"
-        # shellcheck disable=SC2155
-        local dir="$(realpath "$2" 2>/dev/null)"
-        local previous
-        [ -n "$variable" ] || return 1
-        [ -d "$dir" ] || return 1
+[ -f "$HOME/.bashrc" ] && source "$HOME/.bashrc"
 
-        case "$(eval echo ':${'"$variable"'}:' )" in
-        *":${dir}:"*) ;;
-        *)
-            # shellcheck disable=SC2016
-            previous='${'"$variable"':+$'"$variable"':}'
-            eval "$variable=$(eval echo "$previous")$dir" ;;
-        esac
+[ -n "$__BASH_PROFILE_SOURCED" ] && return
+
+normalize_search_variable() {
+        local array out
+        local list="${1?missing PATH-like string}"
+        mapfile -t array < <(echo "$list" | tr : $'\n' | awk 'NF && !x[$0]++')
+
+        out=$(( ${#array[@]} -1 ))
+        printf '%s:' "${array[@]:0:$out}" "${array[$out]}"
 }
 
-add_to MANPATH "$HOME/.local/share/man"
+PATH="$(normalize_search_variable "$HOME/.local/bin:$HOME/.cargo/bin:$PATH")"
+MANPATH="$(normalize_search_variable "$HOME/.local/share/man:$MANPATH")"
+# Is better that the search variables are at the end to prioritize the custom
+# sources. Otherwise, the custom sources won't be loaded when there's already a
+# system version (which is not usually what you want).
 
-add_to PATH "$HOME/.local/bin"
-add_to PATH "$HOME/.cargo/bin"
+MANPATH=":$MANPATH" #leading ":" adds sources from /etc/man_db.conf
 
 export MANPATH
 export PATH
@@ -36,4 +35,4 @@ export PAGER=less
 export BROWSER=brave
 export LESS='-R --mouse'
 
-[ -f "$HOME/.bashrc" ] && source "$HOME/.bashrc"
+export __BASH_PROFILE_SOURCED=1

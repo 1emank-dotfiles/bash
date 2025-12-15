@@ -101,5 +101,10 @@ got() {
     git "$action" hub "$branch" "$@"
     git "$action" berg "$branch" "$@"
 }
-
-
+dnv() {
+    if [ -f /tmp/nvim ]; then
+        dtach -a /tmp/nvim
+    else
+        dtach -A /tmp/nvim command nvim "$@"
+    fi
+}

@@ -13,10 +13,11 @@
 normalize_search_variable() {
         local array out
         local list="${1?missing PATH-like string}"
-        mapfile -t array < <(echo "$list" | tr : $'\n' | awk 'NF && !x[$0]++')
+        mapfile -t array < <(echo "$list" | tr : '\n' | awk 'NF && !x[$0]++')
 
         out=$(( ${#array[@]} -1 ))
-        printf '%s:' "${array[@]:0:$out}" "${array[$out]}"
+        printf '%s:' "${array[@]:0:$out}"
+        printf '%s' "${array[$out]}"
 }
 
 PATH="$(normalize_search_variable "$HOME/.local/bin:$HOME/.cargo/bin:$PATH")"
@@ -33,6 +34,5 @@ export PATH
 export EDITOR=nvim
 export PAGER=less
 export BROWSER=brave
-export LESS='-R --mouse'
 
 export __BASH_PROFILE_SOURCED=1

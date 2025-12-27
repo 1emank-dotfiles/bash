@@ -4,7 +4,15 @@
 # vi: ft=sh
 #
 
+# This file is intended to provide shell integration for external tools
+
+# Requirements:
+#   awk
+#   fzf
+#   command-not-found | pkgfile
+
 if exists fzf; then
+        # load after `set -o vi`
         _fzf_lazy() {
                 unset -f _fzf_lazy
                 eval "$(fzf --bash)"
@@ -15,3 +23,29 @@ if exists fzf; then
         bind -x '"\C-r": _fzf_lazy __fzf_history__'
         bind -x '"\A-c": _fzf_lazy __fzf_cd__'
 fi
+
+# Probably there's a safer way to do it, but I don't want keep track of each
+# distro's use of spaces and quotes; hence the liberal use of asterisks.
+# (Although I don't think the /etc/os-release file would change that often to
+# be too worried about it)
+OS="$(awk '/^NAME=/{sub(/^NAME=/, ""); print}' /etc/os-release 2>/dev/null)"
+case "${OS,,}" in
+*nix*os*) if exists command-not-found
+        then command_not_found_handle() {
+                command-not-found "$1"
+        } fi;;
+*endeavour*os*|*arch*linux*) if exists pkgfile
+        then command_not_found_handle() {
+                local packages
+                error "The program '$1' not found in your PATH"
+                packages="$(pkgfile "$1")"
+                if [ -n "$packages" ]; then
+                    error "You can get it by installing the following" \
+                            "package(s):"
+                    # shellcheck disable=2086
+                    errorf '\t%s\n' $packages
+                fi
+                return 127
+        } fi;;
+esac
+unset -v OS

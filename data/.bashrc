@@ -7,37 +7,18 @@
 # If not running interactively, don't do anything
 [[ $- != *i* ]] && return
 
-rc_vars=()
-rc_local() {
-        local name
-        local value
-        IFS='=' read -r name value <<< "$1"
-        eval "$name='$value'"
-        rc_vars+=("$name")
-}
-rc_unset() {
-        local var
-        for var in "${rc_vars[@]}"; do
-                unset "$var"
-        done
-        unset rc_local
-        unset rc_unset
-        unset rc_vars
-}
-
 HISTSIZE=1000
 HISTFILESIZE=2000
 HISTCONTROL=ignoreboth
-HISTIGNORE=ls:pwd:clear:reload:reset
+HISTIGNORE=ls:l:ll:la:pwd:clear:reload:reset
 
 ## Opts
 
 shopt -s histappend
-shopt -s checkwinsize
 shopt -s nullglob
 shopt -s globstar
 shopt -s autocd
-set -o vi #some macros conflicts with fzf, so fzf has to be after this
+set -o vi
 bind 'set completion-ignore-case on'
 
 ## Files
@@ -48,25 +29,27 @@ bind 'set completion-ignore-case on'
 
 ## PS1
 
-use_color && {
-        rc_local SUCCESS=$'\[\E[92m\]'   #\[$(tput setaf 10)\]
-        rc_local TITLE=$'\[\E[94m\]'     #\[$(tput setaf 12)\]
-        rc_local ERROR=$'\[\E[91m\]'     #\[$(tput setaf 9)\]
-        rc_local WARNING=$'\[\E[93m\]'   #\[$(tput setaf 11)\]
-        rc_local RESET=$'\[\E(B\E[m\]'   #\[$(tput sgr0)\]
-}
+RC_VARS=(RC_VARS COLOR_PROMPT)
+# COLOR_PROMPT is intended to be provided at launch like:
+#   `COLOR_PROMPT=false bash`
+case "$TERM:$COLOR_PROMPT" in
+*:false);;
+xterm-color:* | *-256color:* | alacritty:* | foot:* | xterm-kitty:* )
+        if tput sgr0 >/dev/null 2>&1; then
+                RC_VARS+=(SUCCESS TITLE ERROR WARNING RESET)
 
-rc_local TERMUX
-
-case "$HOME" in
-*termux*) TERMUX=true ;;
-*) TERMUX=false ;;
+                SUCCESS=$'\[\E[92m\]'   # \[$(tput setaf 10)\]
+                TITLE=$'\[\E[94m\]'     # \[$(tput setaf 12)\]
+                ERROR=$'\[\E[91m\]'     # \[$(tput setaf 9)\]
+                WARNING=$'\[\E[93m\]'   # \[$(tput setaf 11)\]
+                RESET=$'\[\E(B\E[m\]'   # \[$(tput sgr0)\]
+        fi;;
 esac
 
-if $TERMUX
-then PS1="[${TITLE}\w${RESET}]"
-else PS1="[${SUCCESS}\u@\h${RESET}:${TITLE}\w${RESET}]"
-fi
+case "$HOME" in
+*termux*) PS1="[${TITLE}\w${RESET}]" ;;
+*) PS1="[${SUCCESS}\u@\h${RESET}:${TITLE}\w${RESET}]" ;;
+esac
 
 if exists git; then
         __PROMPT_COMMAND() {
@@ -90,29 +73,10 @@ if exists git; then
 fi
 
 if [ $UID = 0 ]
-then PS1+="$WARNING"'# '"$RESET"
+then PS1+="$WARNING# $RESET"
 else PS1+='$ '
 fi
 
-## Welcome
-
-if $TERMUX && exists fastfetch; then #implies color support
-        if [ -f ~/../../cache/bash_welcome ]; then
-                fastfetch
-                rm ~/../../cache/bash_welcome
-        else
-                :> ~/../../cache/bash_welcome
-        fi
-elif
-        exists fastfetch &&
-        [ ! -f /tmp/bash_welcome_$UID ] &&
-        [ -z "${TMUX}${NVIM}" ]
-then
-        :> /tmp/bash_welcome_$UID
-        if [ -n "$SUCCESS" ] #implies color support
-        then fastfetch
-        else fastfetch --pipe
-        fi
-fi
-
-rc_unset #cleanup
+for var in "${RC_VARS[@]}"; do
+        unset -v "$var"
+done

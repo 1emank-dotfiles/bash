@@ -4,30 +4,51 @@
 # vi: ft=sh
 #
 
-## Functions
+# This file provides a series of functions (and/or aliases) that are intended
+# to be useful utilities related to the shell itself. Things that could be
+# builtins.
 
-exists() { command -v "$1" >/dev/null 2>&1; }
+# Requirements:
+#   awk
+
+exist() {
+    exit_code=0
+    while [ -n "$1" ]; do
+            command -v "$1" >/dev/null 2>&1 || exit_code=$((exit_code +1))
+            shift
+    done
+    return $exit_code
+}
+alias exists=exist
+
+# shellcheck disable=2046
 launch() {
         case "$1" in
-        -q) shift; { ( launch "$@" & ) } >/dev/null 2>&1; return;;
+        -q) shift; { ( launch "$@" & ) } >/dev/null 2>&1;;
         '') return 1;;
-        *) nohup "$@" >/dev/null 2>&1 & return;;
+        *.desktop)
+            local app="$1"
+            shift
+            launch $(
+                    awk '/^Exec=/{sub(/^Exec=/, ""); print}' "$app"
+            ) "$@";;
+        *) nohup "$@" >/dev/null 2>&1;;
         esac
 }
-reload() { exec "${SHELL:-/bin/bash}"; }
-reset() { [ -n "$TMUX" ] && tmux clear-history; command reset; }
 
-## RC
-use_color() {
-        unset -f use_color
-        # shellcheck disable=SC2154
-        case "$TERM:$color_prompt" in
-        *:false) return 1 ;;
-        xterm-color:* | *-256color:* | alacritty:* | foot:* )
-                if tput sgr0 >/dev/null 2>&1
-                then return 0
-                else return 1
-                fi ;;
-        *) return 1 ;;
-        esac
+reset() {
+        [ -n "$TMUX" ] && tmux clear-history
+        command reset
+}
+
+# shellcheck disable=2142
+alias reload='exec "${SHELL:-"$0"}"'
+
+errorf() {
+    # shellcheck disable=2059
+    printf "$@" 1>&2
+}
+
+error() {
+    echo "$@" 1>&2
 }

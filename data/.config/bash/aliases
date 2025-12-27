@@ -4,19 +4,35 @@
 # vi: ft=sh
 #
 
+# This file provides a series of aliases (and/or functions) related to specific
+# utilities and workflows, external to the shell itself.
+
+# Requirements:
+#   neovim
+#   neovim-remote
+#   tmux
+#   bat
+#   git
+#   dtach
+
+# Note:
+#   Light mode neovim (lnv) is currently unsupported in my neovim setup
+#       https://codeberg.org/1emank-dotfiles/Nvim
+#   Basically because I haven't implemented it yet in my theme:
+#       "1emank-nvim/SimpleTheme"
+
 nv() {
-        case "$NVIM::$@" in
-        '::') nvim ;;
-        '::'*) nvim "$@" ;;
-        '*::') nvr ;;
-        '*::'*) nvr "$@" ;;
+        case "$NVIM:$@" in
+        :) nvim ;;
+        :*) nvim "$@" ;;
+        *:) nvr ;;
+        *:*) nvr "$@" ;;
         esac
 }
 lnv() {
         THEME=light nv "$@"
 }
 alias nman='MANPAGER="nvim +Man!" man'
-alias sunv='sudo -E nvim'
 alias lnman='THEME=light MANPAGER="nvim +Man!" man'
 alias upnv="nvim --headless '+Lazy! sync' +qa"
 
@@ -26,10 +42,9 @@ tmux() {
         else command tmux "$@"
         fi
 }
-alias work='launch -q brave --user-data-dir="$HOME/.local/work"'
 
-alias x='pushd ..'
 alias z='popd'
+alias x='pushd ..'
 alias c='pushd'
 
 alias ls='ls --color=auto'
@@ -38,7 +53,8 @@ alias l='ls -AF --color=auto'
 alias ll='ls -lAFh --color=auto'
 alias grep='grep --color=auto'
 alias bat='bat --paging=always'
-nopager(){ # no pager
+
+nopager(){
         case "$1" in
         ""|-+(0)|+(0));;
         +([0-9]))
@@ -60,12 +76,11 @@ nopager(){ # no pager
             PAGER=cat "$@"
             return;;
         esac
-        { echo Usage:
-        echo "    npg [[-]1-n] COMMAND-THAT-EXPECTS-A-PAGER [ARGUMENTS]"
-        echo
-        echo "If the optional number is positive, it will print the first 'n' lines."
-        echo "If it's negative, it will print the last 'n' lines."
-        } 1>&2
+        errorf '%s\n' \
+        "$0: Usage:" \
+        "    $0 [[-]1-n] COMMAND-THAT-EXPECTS-A-PAGER [ARGUMENTS]" "" \
+        "If the optional number is positive, it will print the first 'n'"`
+        `" lines. If it's negative, it will print the last 'n' lines."
         return 1
 }
 alias npg=nopager
@@ -92,19 +107,19 @@ notes() {
                 ;;
         esac
 }
-got() {
-    local action="${1:-pull}"
+alias gpom='git pull origin main'
+gpush() {
+    local args=("${1:-main}")
     [ -n "$1" ] && shift
-    local branch="${1:-main}"
-    [ -n "$1" ] && shift
+    args=("$@")
 
-    git "$action" hub "$branch" "$@"
-    git "$action" berg "$branch" "$@"
+    git push hub "${args[@]}"
+    git push berg "${args[@]}"
 }
 dnv() {
-    if [ -f /tmp/nvim ]; then
-        dtach -a /tmp/nvim
-    else
-        dtach -A /tmp/nvim command nvim "$@"
+    if [ -f /tmp/nvim ]
+    then dtach -a /tmp/nvim
+    else dtach -A /tmp/nvim command nvim "$@"
     fi
 }
+alias ldnv='THEME=light dnv'
